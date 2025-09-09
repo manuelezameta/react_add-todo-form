@@ -73,6 +73,7 @@ export const App = () => {
               setTitle(e.target.value);
               setInputTouched(false);
             }}
+            placeholder='Enter title (e.g. "Do the laundry")'
           />
           {inputTouched && !title && (
             <span className="error">Title is required</span>
