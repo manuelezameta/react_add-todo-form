@@ -3,10 +3,11 @@ import './App.scss';
 import usersFromServer from './api/users';
 import todosFromServer from './api/todos';
 import { TodoList } from './components/TodoList';
-import { useState } from 'react';
+import { FormEvent, useState } from 'react';
+import { Todo } from './type/todo';
 
 export const App = () => {
-  const todosProccessed = todosFromServer.map(todo => {
+  const todosProccessed: Todo[] = todosFromServer.map(todo => {
     return {
       ...todo,
       user: usersFromServer.find(user => user.id === todo.userId)!,
@@ -14,33 +15,36 @@ export const App = () => {
   });
 
   const [count, setCount] = useState(0);
-  const [todos, setTodos] = useState(todosProccessed);
+  const [todos, setTodos] = useState<Todo[]>(todosProccessed);
   const [inputTouched, setInputTouched] = useState(false);
   const [selectTouched, setSelectTouched] = useState(false);
   const [title, setTitle] = useState('');
   const [userId, setUserId] = useState(0);
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    if (!title) {
+    let hasError = false;
+
+    if (!title.trim()) {
       setInputTouched(true);
-
-      if (userId === 0) {
-        setSelectTouched(true);
-      }
-
-      return;
+      hasError = true;
     }
 
     if (userId === 0) {
       setSelectTouched(true);
+      hasError = true;
+    }
 
+    if (hasError) {
       return;
     }
 
+    const maxId = todos.length ? Math.max(...todos.map(t => t.id)) : 0;
+    const id = maxId + 1;
+
     const newTodo = {
-      id: Math.max(...todos.map(todo => todo.id)) + 1,
+      id,
       title: title.trim(),
       userId,
       completed: false,
@@ -52,6 +56,8 @@ export const App = () => {
     setCount(prevCount => prevCount + 1);
     setTitle('');
     setUserId(0);
+    setInputTouched(false);
+    setSelectTouched(false);
   }
 
   return (
@@ -65,27 +71,29 @@ export const App = () => {
         onSubmit={handleSubmit}
       >
         <div className="field">
+          <label htmlFor="titleInput">Title: </label>
           <input
             type="text"
             data-cy="titleInput"
             value={title}
-            onChange={e => {
-              setTitle(e.target.value);
+            onChange={event => {
+              setTitle(event.target.value);
               setInputTouched(false);
             }}
             placeholder='Enter title (e.g. "Do the laundry")'
           />
           {inputTouched && !title && (
-            <span className="error">Title is required</span>
+            <span className="error">Please enter a title</span>
           )}
         </div>
 
         <div className="field">
+          <label htmlFor="userSelect">User: </label>
           <select
             data-cy="userSelect"
             value={userId}
-            onChange={e => {
-              setUserId(+e.target.value);
+            onChange={event => {
+              setUserId(+event.target.value);
               setSelectTouched(false);
             }}
           >
