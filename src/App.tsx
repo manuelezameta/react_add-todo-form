@@ -21,8 +21,8 @@ export const App = () => {
   const [title, setTitle] = useState('');
   const [userId, setUserId] = useState(0);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
     let hasError = false;
 
@@ -82,7 +82,7 @@ export const App = () => {
             }}
             placeholder='Enter title (e.g. "Do the laundry")'
           />
-          {inputTouched && !title && (
+          {inputTouched && !title.trim() && (
             <span className="error">Please enter a title</span>
           )}
         </div>
